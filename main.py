@@ -11,18 +11,21 @@ pygame.display.set_caption("Space Invader Tutorial")
 
 # LOAD IMAGES
 # enemy ships
-RED_SPACE_SHIP = pygame.image.load(os.path.join("assets", "red_ship.png"))
-GREEN_SPACE_SHIP = pygame.image.load(os.path.join("assets", "green_ship.png"))
-PURPLE_SPACE_SHIP = pygame.image.load(os.path.join("assets", "purple_ship.png"))
+BLUE_SPACE_SHIP = pygame.image.load(os.path.join("assets", "pixel_ship_blue_small.png"))
+GREEN_SPACE_SHIP = pygame.image.load(os.path.join("assets", "pixel_ship_green_small.png"))
+RED_SPACE_SHIP = pygame.image.load(os.path.join("assets", "pixel_ship_red_small.png"))
 
 # user ship
-USER_SHIP = pygame.image.load(os.path.join("assets", "user_ship.png"))
+USER_SHIP = pygame.image.load(os.path.join("assets", "pixel_ship_yellow_small.png"))
 
-#laser
-LASER = pygame.image.load(os.path.join("assets", "laser.png"))
+# lasers
+BLUE_LASER = pygame.image.load(os.path.join("assets", "pixel_laser_blue.png"))
+GREEN_LASER = pygame.image.load(os.path.join("assets", "pixel_laser_green.png"))
+RED_LASER = pygame.image.load(os.path.join("assets", "pixel_laser_red.png"))
+YELLOW_LASER = pygame.image.load(os.path.join("assets", "pixel_laser_yellow.png"))
 
 # background
-BG = pygame.transform.scale(pygame.image.load(os.path.join("assets", "background.png")), (WIDTH, HEIGHT))
+BG = pygame.transform.scale(pygame.image.load(os.path.join("assets", "background_black.png")), (WIDTH, HEIGHT))
 
 # ship constructor
 class Ship:
@@ -30,13 +33,23 @@ class Ship:
         self.x = x
         self.y = y
         self.health = health
-        self.ship_img = None            # draw the ship
+        self.player_img = None            # draw the ship
         self.laser_img = None           # draw the laser
         self.lasers = []
         self.cool_down_counter = 0
 
     def draw(self, window):
-        pygame.draw.rect(window, (255, 0, 0), (self.x, self.y, 50, 50))
+        window.blit(self.player_img, (self.x, self.y))
+
+class Player(Ship):
+    def __init__(self, x, y, health = 100):
+        # Using ships initialization method on player
+        super().__init__(x, y, health)
+        self.player_img = USER_SHIP
+        self.laser_img = YELLOW_LASER
+        # Creates a mask of the image (so we can do pixel-perfect collision)
+        self.mask = pygame.mask.from_surface(self.player_img)
+        self.max_health = health
 
 # MAIN LOOP
 def main():
@@ -48,8 +61,8 @@ def main():
 
     player_vel = 5      # every time a user presses a key, it moves 5 pixels
 
-    # ship object
-    ship = Ship(300, 650)
+    # player object
+    player = Player(300, 650)
 
     clock = pygame.time.Clock()
 
@@ -62,8 +75,8 @@ def main():
         WIN.blit(lives_label, (10, 10))
         WIN.blit(level_label, (WIDTH - level_label.get_width() - 10, 10))
 
-        # drawing the ship
-        ship.draw(WIN)
+        # drawing the player
+        player.draw(WIN)
 
         pygame.display.update()
 
@@ -77,14 +90,14 @@ def main():
 
         # checking to see what keys are pressed
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_a]: # left KEY
-            ship.x -= player_vel
-        if keys[pygame.K_d]: # right KEY
-            ship.x += player_vel
-        if keys[pygame.K_w]: # up KEY
-            ship.y -= player_vel
-        if keys[pygame.K_s]: # down KEY
-            ship.y += player_vel
+        if keys[pygame.K_a] and (player.x - player_vel > 0): # left KEY
+            player.x -= player_vel
+        if keys[pygame.K_d] and (player.x + player_vel + 50 < WIDTH): # right KEY
+            player.x += player_vel
+        if keys[pygame.K_w] and (player.y - player_vel > 0): # up KEY
+            player.y -= player_vel
+        if keys[pygame.K_s] and (player.y + player_vel + 50 < HEIGHT): # down KEY
+            player.y += player_vel
 
 
 main()
