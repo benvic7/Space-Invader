@@ -71,6 +71,7 @@ class Ship:
         for laser in self.lasers:
             laser.draw(window)
 
+    # method to move lasers
     def move_lasers(self, vel, obj):
         self.cooldown()     # call the cooldown so we can't shoot too fast
         for laser in self.lasers:
@@ -81,69 +82,103 @@ class Ship:
                 obj.health -= 10        # decrease enemy health if collision
                 self.lasers.remove(laser)       # remove laser if collision
 
+    # laser cool down method
     def cooldown(self):
         if self.cool_down_counter >= self.COOLDOWN:
             self.cool_down_counter = 0
         elif self.cool_down_counter > 0:
             self.cool_down_counter += 1
+
+    # method to shoot lasers
     def shoot(self):
-        if self.cool_down_counter == 0:     #if we're not in the cooldown stage of waiting to shoot the next laser
+        if self.cool_down_counter == 0:     # if we're not in the cooldown stage of waiting to shoot the next laser
             laser = Laser(self.x, self.y, self.laser_img)
             self.lasers.append(laser)
             self.cool_down_counter = 1
 
+    # returns ship width
     def get_width(self):
         return self.ship_img.get_height()
 
+    # returns ship height
     def get_height(self):
         return self.ship_img.get_width()
 
-# Player ship class (extension of ship)
+# player ship class (extension of ship)
 class Player(Ship):
+    # player ship constructor
     def __init__(self, x, y, health = 100):
         # Using ships initialization method on player
         super().__init__(x, y, health)
         self.ship_img = USER_SHIP
         self.laser_img = YELLOW_LASER
         # Creates a mask of the image (so we can do pixel-perfect collision)
-        self.mask = pygame.mask.from_surface(self.ship_img)
+        self.mask = pygame.mask.from_surface(USER_SHIP)
         self.max_health = health
 
+    # method to move player lasers
     def move_lasers(self, vel, objs):
         self.cooldown()     # call the cooldown so we can't shoot too fast
         for laser in self.lasers:
             laser.move(vel)     # will continue to move if on screen and not colliding
             if laser.off_screen(HEIGHT):
-                self.lasers.remove(laser)       # remove laser if off screen
+                self.lasers.remove(laser)       # remove laser if off-screen
             else:
                 for obj in objs:
-                    objs.remove(obj)        # remove the object (what is the object) if the laser has collided with it
-                    self.lasers.remove(laser)       # remove laser if collision
+                    if laser.collision(obj):
+                        objs.remove(obj)        # remove the object (what is the object) if the laser has collided with it
+                        if laser in self.lasers:
+                            self.lasers.remove(laser)       # remove laser if collision
 
-# Enemy ship class (extension of ship)
+    def draw(self, window):
+        super().draw(window)
+        self.healthbar(window)
+
+    def healthbar(self, window):
+        # drawing a red and green rectangle for the health bars rect(surface, color, (height, width))
+        pygame.draw.rect(window, (255, 0, 0), (self.x, self.y + self.ship_img.get_height() + 10, self.ship_img.get_width(), 10))
+        # multiplying the width by current health/max health to get the percentage of health we have left
+        pygame.draw.rect(window, (0, 255, 0), (self.x, self.y + self.ship_img.get_height() + 10, self.ship_img.get_width() * (self.health/self.max_health), 10))
+
+
+# enemy ship class (extension of ship)
 class Enemy(Ship):
+    # dictionary of ships
     COLOR_MAP = {
         "red": (RED_SPACE_SHIP, RED_LASER),
         "green": (GREEN_SPACE_SHIP, GREEN_LASER),
         "blue": (BLUE_SPACE_SHIP, BLUE_LASER)
     }
+
+    # enemy ship constructor
     def __init__(self, x, y, color, health = 100):
         super().__init__(x, y, health)
         self.ship_img, self.laser_img = self.COLOR_MAP[color]
         self.mask = pygame.mask.from_surface(self.ship_img)
 
+    # method to move enemy ship (CHANGE THIS IN FINAL)
     def move(self, vel):
         self.y += vel
+
+    def shoot(self):
+        if self.cool_down_counter == 0:     # if we're not in the cooldown stage of waiting to shoot the next laser
+            # can alter this if I want it to be more centered shooting
+            laser = Laser(self.x - 20, self.y, self.laser_img)
+            self.lasers.append(laser)
+            self.cool_down_counter = 1
+
+# THE FOLLOWING FUNCTIONS ARE OUTSIDE OF A CLASS
 
 # Both objects have a mask. If the masks are overlapping based on the offset we have given them
 def collide(obj1, obj2):
     offset_x = obj2.x - obj1.x      # distance between object 1 and object 2 (horizontally)
     offset_y = obj2.y - obj1.y      # distance between object 1 and object 2 (vertically)
     # if not overlapping, we will return 1. If we are overlapping, we will return a touple of (x, y)
-    return obj1.mask.overlap(obj2, (offset_x, offset_y)) != None
+    return obj1.mask.overlap(obj2.mask, (offset_x, offset_y)) != None
 
 # MAIN LOOP
 def main():
+    # initializing variables
     run = True
     FPS = 60
     level = 0
@@ -166,6 +201,7 @@ def main():
     lost = False
     lost_count = 0
 
+    # we redraw the screen based on our FPS rate (60 times per second?)
     def redraw_window():
         WIN.blit(BG, (0,0))     # placing in our background
 
@@ -188,9 +224,10 @@ def main():
 
         pygame.display.update()
 
+    # MAIN LOOP
     while run:
         clock.tick(FPS)     # ticking our clock based on our FPS rate (60)
-        redraw_window()
+        redraw_window()     # redrawing the screen
 
         # If we have lost, set lost to true and lost count to 1
         if lives <= 0 or player.health <= 0:
@@ -214,7 +251,7 @@ def main():
 
         for event in pygame.event.get():        # check for an event every clock cycle
             if event.type == pygame.QUIT:       # if we press the quit button, loop will fail
-                run = False
+                quit()
 
         # checking to see what keys are pressed
         keys = pygame.key.get_pressed()
@@ -224,7 +261,7 @@ def main():
             player.x += player_vel
         if keys[pygame.K_w] and (player.y - player_vel > 0): # up KEY
             player.y -= player_vel
-        if keys[pygame.K_s] and (player.y + player_vel + player.get_height() < HEIGHT): # down KEY
+        if keys[pygame.K_s] and (player.y + player_vel + player.get_height() + 10 < HEIGHT): # down KEY
             player.y += player_vel
         if keys[pygame.K_SPACE]:
             player.shoot()
@@ -232,12 +269,35 @@ def main():
         for enemy in enemies[:]:
             enemy.move(enemy_vel)
             enemy.move_lasers(laser_vel, player)
-            if enemy.y + enemy.get_height() > HEIGHT:
+
+            if random.randrange(0, 3*60) == 1:       # 50% chance of a shot every 3 seconds (60 fps, between 1 and 2)
+                enemy.shoot()
+
+            # if we collide with the enemy, it should remove the enemy and our ship
+            if collide(enemy, player):
+                player.health -= 10
+                enemies.remove(enemy)
+            elif enemy.y + enemy.get_height() > HEIGHT:
                 lives -= 1
                 # removing enemies from the list copy so that when we are at 0 enemies we can advance levels
                 enemies.remove(enemy)
 
         player.move_lasers(-laser_vel, enemies)
 
+def main_menu():
+    title_font = pygame.font.SysFont("courier", 40)
+    run = True
+    while run:
+        WIN.blit(BG, (0, 0))
+        title_label = title_font.render("Press the mouse to begin...", 1, (255, 255, 255))
+        WIN.blit(title_label, (WIDTH/2 - title_label.get_width()/2, 350))
+        pygame.display.update()
+        # if we press the quit button, quit the game. If we press any other key, start the game
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                main()
+    pygame.quit()
 
-main()
+main_menu()
