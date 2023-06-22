@@ -27,34 +27,35 @@ YELLOW_LASER = pygame.image.load(os.path.join("assets", "pixel_laser_yellow.png"
 # background
 BG = pygame.transform.scale(pygame.image.load(os.path.join("assets", "background_black.png")), (WIDTH, HEIGHT))
 
-# laser constructor
+# laser class
 class Laser:
-    # initializes the laser
+    # constructor to initialize the laser
     def __init__(self, x, y, img):
         self.x = x
         self.y = y
         self.img = img
         self.mask = pygame.mask.from_surface(self.img)
 
-    # draws the laser
+    # method to draw the laser
     def draw(self, window):
         window.blit(self.img, (self.x, self.y))
 
-    # moves the laser
+    # method to move the laser
     def move(self, vel):
         self.y += vel
 
-    # will tell us that the laser is off the screen
+    # method to tell us if the laser is off the screen
     def off_screen(self, height):
-        return self.y <= height and self.y >= 0
+        return not (self.y <= height and self.y >= 0)
 
-    #will tell us if the laser collides with an object (ship)
+    # method to tell us if the laser collides with an object (ship)
     def collision(self, obj):
         return collide(obj, self)
 
-# ship constructor
+# ship class
 class Ship:
     COOLDOWN = 30
+    # constructor to initialize ships
     def __init__(self, x, y, health = 100):
         self.x = x
         self.y = y
@@ -64,8 +65,21 @@ class Ship:
         self.lasers = []
         self.cool_down_counter = 0
 
+    # method to draw ships
     def draw(self, window):
         window.blit(self.ship_img, (self.x, self.y))
+        for laser in self.lasers:
+            laser.draw(window)
+
+    def move_lasers(self, vel, obj):
+        self.cooldown()     # call the cooldown so we can't shoot too fast
+        for laser in self.lasers:
+            laser.move(vel)     # will continue to move if on screen and not colliding
+            if laser.off_screen(HEIGHT):
+                self.lasers.remove(laser)       # remove laser if off screen
+            elif laser.collision(obj):
+                obj.health -= 10        # decrease enemy health if collision
+                self.lasers.remove(laser)       # remove laser if collision
 
     def cooldown(self):
         if self.cool_down_counter >= self.COOLDOWN:
@@ -74,7 +88,7 @@ class Ship:
             self.cool_down_counter += 1
     def shoot(self):
         if self.cool_down_counter == 0:     #if we're not in the cooldown stage of waiting to shoot the next laser
-            laser = Laser(x, y, self.laser.img)
+            laser = Laser(self.x, self.y, self.laser_img)
             self.lasers.append(laser)
             self.cool_down_counter = 1
 
@@ -94,6 +108,17 @@ class Player(Ship):
         # Creates a mask of the image (so we can do pixel-perfect collision)
         self.mask = pygame.mask.from_surface(self.ship_img)
         self.max_health = health
+
+    def move_lasers(self, vel, objs):
+        self.cooldown()     # call the cooldown so we can't shoot too fast
+        for laser in self.lasers:
+            laser.move(vel)     # will continue to move if on screen and not colliding
+            if laser.off_screen(HEIGHT):
+                self.lasers.remove(laser)       # remove laser if off screen
+            else:
+                for obj in objs:
+                    objs.remove(obj)        # remove the object (what is the object) if the laser has collided with it
+                    self.lasers.remove(laser)       # remove laser if collision
 
 # Enemy ship class (extension of ship)
 class Enemy(Ship):
@@ -131,6 +156,7 @@ def main():
     enemy_vel = 1       # enemy speed
 
     player_vel = 5      # every time a user presses a key, it moves 5 pixels
+    laser_vel = 5
 
     # player object
     player = Player(300, 650)
@@ -141,7 +167,7 @@ def main():
     lost_count = 0
 
     def redraw_window():
-        WIN.blit(BG, (0,0))     #placing in our background
+        WIN.blit(BG, (0,0))     # placing in our background
 
         # drawing our lives and level text labels
         lives_label = main_font.render(f"lives: {lives}", 1, (255, 255, 255))
@@ -178,7 +204,6 @@ def main():
             else:
                 continue
 
-
         # if we have killed all the enemies, increase the level by 1 and number of enemies by 5
         if len(enemies) == 0:
             level += 1
@@ -201,11 +226,18 @@ def main():
             player.y -= player_vel
         if keys[pygame.K_s] and (player.y + player_vel + player.get_height() < HEIGHT): # down KEY
             player.y += player_vel
+        if keys[pygame.K_SPACE]:
+            player.shoot()
 
         for enemy in enemies[:]:
             enemy.move(enemy_vel)
+            enemy.move_lasers(laser_vel, player)
             if enemy.y + enemy.get_height() > HEIGHT:
                 lives -= 1
-                enemies.remove(enemy)       # removing enemies from the list copy so that when we are at 0 enemies we can advance levels
+                # removing enemies from the list copy so that when we are at 0 enemies we can advance levels
+                enemies.remove(enemy)
+
+        player.move_lasers(-laser_vel, enemies)
+
 
 main()
