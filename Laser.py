@@ -1,10 +1,13 @@
 import pygame
 
+
+# collide function
 def collide(obj1, obj2):
-    offset_x = obj2.x - obj1.x      # distance between object 1 and object 2 (horizontally)
-    offset_y = obj2.y - obj1.y      # distance between object 1 and object 2 (vertically)
+    offset_x = obj2.x - obj1.x  # distance between object 1 and object 2 (horizontally)
+    offset_y = obj2.y - obj1.y  # distance between object 1 and object 2 (vertically)
     # if not overlapping, we will return 1. If we are overlapping, we will return a touple of (x, y)
     return obj1.mask.overlap(obj2.mask, (offset_x, offset_y)) != None
+
 
 class Laser:
     # constructor to initialize the laser
