@@ -1,2 +1,2 @@
 # Space-Invader
-Space Invader project using Python and Pygame.
+This program implements an interactive Space Invader-style game using Pygame and Python.
