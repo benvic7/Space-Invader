@@ -34,6 +34,4 @@ Dependencies: **Pycharm**
 9. The game ends when your health reaches zero or all lives are lost.
 
 
-## Note
-
-I was aided by the [Space Invaders Tutorial](https://www.youtube.com/watch?v=Q-__8Xw9KTM&t=3s) to build this program. Enjoy the game! 🚀
+Enjoy the game! 🚀
