@@ -21,8 +21,8 @@ Language: **Python** (with Pygame)
 
 ## How to use
 
-1. Ensure you have Python 3.x installed. Install Pygame by running: `pip install pygame`.
-2. Clone this repository: `git clone https://github.com/benvic7/Space-Invader.git`.
+1. Clone this repository: `git clone https://github.com/benvic7/Space-Invader.git`.
+2. Ensure you have Python 3.x installed. Install Pygame by running: `pip install pygame`.
 3. Navigate to the project directory and run the main.py file using a Python interpreter to start the game.
 4. Control your spaceship using the arrow keys (LEFT, RIGHT, UP, DOWN).
 5. Press SPACE to shoot lasers.
