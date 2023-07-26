@@ -23,7 +23,7 @@ Dependencies: **Pycharm**
 - Pixel-Perfect Collision: accurate collision detection ensures precise interactions between objects.
 
 
-## How to use
+## How to Use/Play
 
 1. Clone this repository: `git clone https://github.com/benvic7/Space-Invader.git`.
 2. Ensure you have Python 3.x installed. Install Pygame by running: `pip install pygame`.
