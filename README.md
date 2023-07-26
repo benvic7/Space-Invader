@@ -8,7 +8,9 @@ Author: **Ben Vicinelli**
 
 Date: **June 2023**
 
-Language: **Python** (with Pygame)
+Language: **Python**
+
+Libraries: **Pycharm**
 
 
 ## Features
