@@ -4,9 +4,11 @@
 
 Space Invader is a classic arcade-style game built in Python using the Pygame library. The game involves a player controlling a spaceship, shooting lasers to destroy incoming enemy ships, and avoiding enemy fire. The objective is to survive as long as possible and achieve the highest score.
 
-Author: Ben Vicinelli
+Author: **Ben Vicinelli**
 
-Date: June 2023
+Date: **June 2023**
+
+Language: **Python** (with Pygame)
 
 ## Features
 
