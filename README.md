@@ -10,7 +10,7 @@ Date: **June 2023**
 
 Language: **Python**
 
-Libraries: **Pycharm**
+Dependencies: **Pycharm**
 
 
 ## Features
