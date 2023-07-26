@@ -10,6 +10,7 @@ Date: **June 2023**
 
 Language: **Python** (with Pygame)
 
+
 ## Features
 
 - Player Spaceship: the player can control a spaceship using arrow keys to navigate and the spacebar to shoot lasers.
@@ -18,6 +19,7 @@ Language: **Python** (with Pygame)
 - Lives System: the player loses a life for every enemy ship that passes.
 - Multiple Levels: the game becomes progressively more challenging with each level, as more enemy ships appear.
 - Pixel-Perfect Collision: accurate collision detection ensures precise interactions between objects.
+
 
 ## How to use
 
@@ -28,6 +30,7 @@ Language: **Python** (with Pygame)
 5. Press SPACE to shoot lasers.
 6. Try to survive by avoiding enemy fire, shooting down enemy ships, and not letting enemies pass.
 9. The game ends when your health reaches zero or all lives are lost.
+
 
 ## Note
 
